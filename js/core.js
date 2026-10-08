@@ -106,6 +106,8 @@ BK.tzAbbr = () => {   // singkatan zona: WIB / WITA / WIT, atau GMT±n untuk zon
   if (!v) { const o = -new Date().getTimezoneOffset(), a = Math.abs(o); v = 'GMT' + (o < 0 ? '-' : '+') + Math.floor(a / 60) + (a % 60 ? ':' + p2(a % 60) : ''); }
   _ab = { t: Date.now(), v }; return v;
 };
+BK.tzLabel = () => BK.tzAbbr() + (BK.tz() ? ' (' + BK.tz() + ')' : '');   // mis. "WITA (Asia/Makassar)"
+BK.nowStr = () => new Date().toLocaleString('id-ID') + ' ' + BK.tzAbbr();   // "Dicetak" pada laporan: jam perangkat + zona
 BK.localYMD = d => { d = d || new Date(); return d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate()); };   // tanggal menurut jam perangkat
 
 /* ---------- format ---------- */

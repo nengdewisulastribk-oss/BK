@@ -192,7 +192,7 @@
     const m = shell('tamu'), Q = BK.state.Q, ref = (BK.pub && BK.pub.ref) || {};
     m.innerHTML = `<div class="view-enter">
     <div class="page-head"><div><span class="pill" style="background:#F1F5F9;color:var(--text-2)">DATABASE KONSELING</span><h1 class="h-lg" style="margin-top:8px">Data Tamu & Kunjungan BK</h1><p class="t2" style="max-width:640px">Kelola, cari, verifikasi selfie, dan ekspor seluruh catatan kunjungan ruang Bimbingan & Konseling secara terpusat dan rahasia.</p></div>
-      <div class="act"><button class="btn btn-outline" id="xls">${ic('sheet', 16)} Unduh Rekap Excel</button><button class="btn btn-primary" id="pdf">${ic('file', 16)} Ekspor PDF Resmi</button></div></div>
+      <div class="act"><button class="btn btn-outline" id="xls">${ic('sheet', 16)} Unduh Rekap Excel</button><button class="btn btn-primary" id="pdf">${ic('file', 16)} Ekspor PDF Resmi</button><button class="btn btn-outline" id="rpt">${ic('camera', 16)} Laporan Berfoto</button></div></div>
     <div class="grid g3" style="margin-bottom:16px" id="kpis">${'<div class="card skel" style="height:96px"></div>'.repeat(3)}</div>
     <div class="tabs" id="tabs"></div>
     <div class="card" style="margin-top:14px"><div class="filters" id="flt">
@@ -211,7 +211,7 @@
     $('#fk').onchange = e => { Q.kelas = e.target.value; run(); }; $('#fb').onchange = e => { Q.bidang = e.target.value; run(); }; $('#fs').onchange = e => { Q.status = e.target.value; run(); };
     $('#fsl').onclick = e => { Q.selfie = !Q.selfie; e.currentTarget.classList.toggle('on', Q.selfie); run(); };
     $('#fr').onclick = () => { BK.state.Q = Object.assign(qDefault()); tamu(); };
-    $('#xls').onclick = () => doExport('xls'); $('#pdf').onclick = () => doExport('pdf');
+    $('#xls').onclick = () => doExport('xls'); $('#pdf').onclick = () => doExport('pdf'); $('#rpt').onclick = () => BK.laporan.open();
     $('#tabs').onclick = e => { const t = e.target.closest('[data-j]'); if (t) { Q.jenis = t.dataset.j; run(); } };
     if (!BK.pub.ref.kelas) BK.loadPub();
     load();
@@ -241,7 +241,7 @@
       <td><div style="display:flex;gap:10px;align-items:center">${BK.avatar(r)}<div style="min-width:0"><b class="ell" style="display:block;max-width:220px">${esc(r.Nama)}</b><div class="small muted ell" style="max-width:220px">${esc(subOf(r))}</div></div></div></td>
       <td>${BK.badgeJenis(r.Jenis)}</td><td>${esc(unitOf(r))}</td><td>${bidChips(r.Bidang_Layanan_BK)}</td><td>${BK.badgeStatus(r.Status_Tindak_Lanjut)}</td><td>${ic('right', 18)}</td></tr>`).join('')}</tbody></table></div>
       <div class="cards-m">${rows.map(r => `<div class="mcard" data-id="${esc(r.ID_Kunjungan)}"><div style="display:flex;gap:10px;align-items:center">${BK.avatar(r, 'lg')}<div class="grow"><b class="ell" style="display:block">${esc(r.Nama)}</b><div class="small muted ell">${esc(subOf(r))}</div></div>${BK.badgeJenis(r.Jenis)}</div>
-        <div class="small t2" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px"><span class="mono">${esc(r.ID_Kunjungan)}</span><span>${esc(BK.fmtTgl(r.Tanggal))}, ${esc(r.Jam)}</span></div><div>${bidChips(r.Bidang_Layanan_BK)} ${BK.badgeStatus(r.Status_Tindak_Lanjut)}</div></div>`).join('')}</div>`;
+        <div class="small t2" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px"><span class="mono">${esc(r.ID_Kunjungan)}</span><span>${esc(BK.fmtTgl(r.Tanggal))}, ${esc(r.Jam)} ${BK.tzAbbr()}</span></div><div>${bidChips(r.Bidang_Layanan_BK)} ${BK.badgeStatus(r.Status_Tindak_Lanjut)}</div></div>`).join('')}</div>`;
     $('#tbl').onclick = e => { const r = e.target.closest('[data-id]'); if (r) BK.go('#/admin/tamu/' + r.dataset.id); };
     // pagination
     const pages = Math.max(1, Math.ceil(d.total / d.size)), p = d.page, a = Math.max(1, Math.min(p - 2, pages - 4)), b = Math.min(pages, a + 4), nums = [];
@@ -256,18 +256,20 @@
   }
 
   /* ---------- ekspor ---------- */
-  const COLS = [['ID_Kunjungan', 'ID Kunjungan'], ['Tanggal', 'Tanggal'], ['Jam', 'Jam'], ['Jenis', 'Jenis Tamu'], ['Nama', 'Nama'], ['Email', 'Email'], ['No_HP', 'No. HP'], ['Kelas', 'Kelas'], ['Nama_Murid', 'Nama Murid'], ['Asal_Dinas_Instansi', 'Instansi'], ['Jabatan', 'Jabatan'], ['Status_Tamu', 'Status Tamu'], ['Alamat', 'Alamat'], ['Tujuan', 'Tujuan'], ['Bidang_Layanan_BK', 'Bidang Layanan'], ['Keterangan', 'Keterangan'], ['Status_Tindak_Lanjut', 'Status'], ['Catatan_Guru_BK', 'Catatan Guru BK']];
+  const COLS = [['ID_Kunjungan', 'ID Kunjungan'], ['Tanggal', 'Tanggal'], ['Jam', 'Jam'], ['Zona', 'Zona Waktu'], ['Jenis', 'Jenis Tamu'], ['Nama', 'Nama'], ['Email', 'Email'], ['No_HP', 'No. HP'], ['Kelas', 'Kelas'], ['Nama_Murid', 'Nama Murid'], ['Asal_Dinas_Instansi', 'Instansi'], ['Jabatan', 'Jabatan'], ['Status_Tamu', 'Status Tamu'], ['Alamat', 'Alamat'], ['Tujuan', 'Tujuan'], ['Bidang_Layanan_BK', 'Bidang Layanan'], ['Keterangan', 'Keterangan'], ['Status_Tindak_Lanjut', 'Status'], ['Catatan_Guru_BK', 'Catatan Guru BK']];
+  const colLbl = c => c[0] === 'Jam' ? 'Jam (' + BK.tzAbbr() + ')' : c[1];                       // header Jam memuat zona
+  const colVal = (c, x) => c[0] === 'Zona' ? BK.tzLabel() : c[0] === 'Jenis' ? (BK.JENIS[x.Jenis] || {}).l : x[c[0]];
   async function doExport(fmt) {
     const Q = BK.state.Q, btn = $(fmt === 'xls' ? '#xls' : '#pdf'); BK.loading(btn, true, 'Menyiapkan...');
     try {
       const r = await BK.api('exportTamu', fltOf(Q), { timeout: 60000 });
       if (!r.rows.length) { BK.toast('Tidak ada data untuk diekspor', 'warn'); return; }
       const rng = (Q.from || 'awal') + '_sd_' + (Q.to || BK.fmtTgl(BK.localYMD()).replace(/ /g, '-')), name = 'Rekap-Tamu-BK_' + rng;
-      const head = COLS.map(c => `<th>${c[1]}</th>`).join(''), body = r.rows.map(x => '<tr>' + COLS.map(c => `<td>${esc(c[0] === 'No_HP' ? "'" + x[c[0]] : c[0] === 'Jenis' ? (BK.JENIS[x.Jenis] || {}).l : x[c[0]])}</td>`).join('') + '</tr>').join('');
+      const head = COLS.map(c => `<th>${colLbl(c)}</th>`).join(''), body = r.rows.map(x => '<tr>' + COLS.map(c => `<td>${esc(c[0] === 'No_HP' ? "'" + x[c[0]] : colVal(c, x))}</td>`).join('') + '</tr>').join('');
       if (fmt === 'xls') {
         BK.download(name + '.xls', new Blob(['\ufeff<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8"></head><body><table border="1"><thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody></table></body></html>'], { type: 'application/vnd.ms-excel' }));
       } else {
-        $('#printArea').innerHTML = `<h2>Rekap Kunjungan Ruang BK — ${esc(BK.cfg.NAMA_SEKOLAH)}</h2><p style="font-size:11px;margin-bottom:8px">Periode: ${esc(Q.from || 'awal')} s.d. ${esc(Q.to || 'sekarang')} • ${r.rows.length} data • Dicetak ${esc(new Date().toLocaleString('id-ID'))} oleh ${esc(BK.Auth.user.nama)}</p><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+        $('#printArea').innerHTML = `<h2>Rekap Kunjungan Ruang BK — ${esc(BK.cfg.NAMA_SEKOLAH)}</h2><p style="font-size:11px;margin-bottom:8px">Periode: ${esc(Q.from || 'awal')} s.d. ${esc(Q.to || 'sekarang')} • ${r.rows.length} data • Zona waktu ${esc(BK.tzLabel())} • Dicetak ${esc(BK.nowStr())} oleh ${esc(BK.Auth.user.nama)}</p><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
         BK.toast('Pilih "Simpan sebagai PDF" pada dialog cetak', 'ok', 4500); setTimeout(() => window.print(), 300);
       }
       if (r.truncated) BK.toast('Ekspor dibatasi 5.000 baris — persempit rentang tanggal', 'warn', 5000);
@@ -315,7 +317,7 @@
           <div class="shot-box" id="pbox" style="aspect-ratio:4/3">${r.Thumb ? `<img src="${esc(r.Thumb)}" alt="" style="filter:blur(6px);transform:scale(1.1)">` : `<div class="skel" style="height:100%"></div>`}</div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px"><button class="btn btn-soft btn-sm" id="zoom" disabled>${ic('zoom', 15)} Perbesar Foto</button><button class="btn btn-soft btn-sm" id="dl" disabled>${ic('download', 15)} Unduh</button></div>
           <div class="kv-rows" id="pinfo" style="margin-top:12px"><div><span>Berkas Asli</span><b>…</b></div></div></div>
-        <div class="card card-mint"><b class="h-sm">Ringkasan Kunjungan</b><div class="kv-rows" style="margin-top:8px"><div><span>Jenis tamu</span><b>${esc(BK.JENIS[j].l)}</b></div><div><span>Dicatat pada</span><b>${esc(BK.fmtTgl(r.Tanggal))}, ${esc(r.Jam)}</b></div><div><span>Terakhir diubah</span><b id="lastmod">${r.Diubah_Oleh ? esc(r.Diubah_Oleh) + ' • ' + esc(BK.fmtDT(r.Diubah_Pada)) : '—'}</b></div></div></div></div>
+        <div class="card card-mint"><b class="h-sm">Ringkasan Kunjungan</b><div class="kv-rows" style="margin-top:8px"><div><span>Jenis tamu</span><b>${esc(BK.JENIS[j].l)}</b></div><div><span>Dicatat pada</span><b>${esc(BK.fmtTgl(r.Tanggal))}, ${esc(r.Jam)} ${BK.tzAbbr()}</b></div><div><span>Terakhir diubah</span><b id="lastmod">${r.Diubah_Oleh ? esc(r.Diubah_Oleh) + ' • ' + esc(BK.fmtDT(r.Diubah_Pada)) : '—'}</b></div></div></div></div>
       <div style="display:grid;gap:16px"><div class="card"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><b class="h-md" style="display:flex;gap:8px;align-items:center">${ic('file', 20)} Data Identitas & Registrasi</b></div>
           <div class="alert info" style="margin:12px 0">${ic('info', 16)}<span>Admin dapat mengoreksi data masukan formulir jika terdapat kesalahan ketik atau pembaruan kontak.</span></div><div class="form-grid c2" id="dform">${EDITF[j].map(f).join('')}</div></div>
         <div class="card"><b class="h-md" style="display:flex;gap:8px;align-items:center">${ic('lock', 20)} Lembar Catatan Guru BK <span class="pill tag-live" style="margin-left:auto">DOKUMEN RAHASIA BK</span></b><p class="small muted">Kerahasiaan terjamin sesuai kode etik ABKIN</p>
@@ -379,7 +381,7 @@
     catch (e) { const box = $('#pbox'); if (box) box.innerHTML = `<div class="empty" style="padding:30px 10px">${ic('camera', 28)}<p class="small" style="margin-top:6px">${esc(e.message)}</p></div>`; }
   }
   function printDetail(r) {
-    $('#printArea').innerHTML = `<h2>Detail Kunjungan Ruang BK — ${esc(r.ID_Kunjungan)}</h2><p style="font-size:11px">${esc(BK.cfg.NAMA_SEKOLAH)} • Dicetak ${esc(new Date().toLocaleString('id-ID'))} oleh ${esc(BK.Auth.user.nama)} • DOKUMEN RAHASIA BK</p><table><tbody>${COLS.map(c => `<tr><th style="width:28%">${c[1]}</th><td>${esc(c[0] === 'Jenis' ? BK.JENIS[r.Jenis].l : r[c[0]])}</td></tr>`).join('')}</tbody></table>${BK.photos[r.ID_Kunjungan] ? `<p style="margin-top:10px"><img src="${BK.photos[r.ID_Kunjungan].dataUrl}" style="max-width:260px"></p>` : ''}`;
+    $('#printArea').innerHTML = `<h2>Detail Kunjungan Ruang BK — ${esc(r.ID_Kunjungan)}</h2><p style="font-size:11px">${esc(BK.cfg.NAMA_SEKOLAH)} • Zona waktu ${esc(BK.tzLabel())} • Dicetak ${esc(BK.nowStr())} oleh ${esc(BK.Auth.user.nama)} • DOKUMEN RAHASIA BK</p><table><tbody>${COLS.map(c => `<tr><th style="width:28%">${colLbl(c)}</th><td>${esc(colVal(c, r))}</td></tr>`).join('')}</tbody></table>${BK.photos[r.ID_Kunjungan] ? `<p style="margin-top:10px"><img src="${BK.photos[r.ID_Kunjungan].dataUrl}" style="max-width:260px"></p>` : ''}`;
     window.print();
   }
 

@@ -108,7 +108,7 @@
       ${inp('email', 'Email Aktif', { icon: 'mail', type: 'email', mode: 'email', ph: 'nama@email.com', ac: 'email' })}
       ${sel('statusPilih', 'Status Tamu', ref.status_tamu, 'Pilih status')}
       ${cond(['statusPilih', 'Lainnya'], inp('statusManual', 'Tuliskan Status Anda', { ph: 'mis. Kakak kandung', span: true }))}
-      ${sel('alamatPilih', 'Alamat', ['SMA Negeri 6 Palangkaraya', 'Lainnya'], 'Pilih alamat')}
+      ${sel('alamatPilih', 'Alamat', ['SMA Negeri 6 Palangka Raya', 'Lainnya'], 'Pilih alamat')}
       ${cond(['alamatPilih', 'Lainnya'], inp('alamat', 'Tuliskan Alamat Anda', { icon: 'pin', ph: 'Alamat lengkap', span: true, max: 200 }))}
       ${inp('namaMurid', 'Nama Murid yang Dituju', { icon: 'school', ph: 'Nama murid', max: 100 })}
       ${sel('kelas', 'Kelas Murid', ref.kelas, 'Pilih kelas')}
@@ -134,13 +134,17 @@
     <section class="hero">
       ${BK.logo('logo')}
       <div><span class="pill tag-live"><i class="dot"></i> Kios Tamu Digital • Ruang BK Terintegrasi</span>
-        <h1 class="h-hero" style="margin:10px 0 6px">Buku Tamu Digital BK ${esc(info.nama_sekolah)}</h1>
+        <h1 class="h-hero" style="margin:10px 0 6px">Buku Tamu Digital BK
+		<span style="display:block; margin-top:6px;">
+    ${esc(info.nama_sekolah)}
+  </span>
+		</h1>
         <p class="t2" style="max-width:640px">Selamat datang di ruang Bimbingan &amp; Konseling. Silakan pilih kategori kunjungan Anda untuk memulai pencatatan yang aman, ramah, dan terjaga kerahasiaannya.</p></div>
-      <div class="safe-box"><span class="eyebrow" style="display:flex;gap:6px;align-items:center">${ic('shield', 14)} Data Dirahasiakan</span><b style="font-size:18px">Hanya untuk Guru BK</b><div class="small muted">Sesuai kode etik Guru BK Indonesia</div></div>
+      <div class="safe-box"><span class="eyebrow" style="display:flex;gap:6px;align-items:center">${ic('shield', 14)} Data Dirahasiakan</span><b style="font-size:18px">Hanya untuk Guru BK</b><div class="small muted">Sesuai kode etik Guru BK</div></div>
     </section>
     ${stepper(1)}
     <h2 class="h-sm" style="margin-bottom:2px">Pilih Kategori Kunjungan</h2><p class="small muted" style="margin-bottom:12px">Pilih tipe pengunjung untuk menyesuaikan formulir registrasi</p>
-    <div class="cats" id="cats">${Object.keys(BK.JENIS).map(j => `<button type="button" class="cat ${F.jenis === j ? 'on' : ''}" data-cat="${j}"><span class="tick">${ic('check', 14)}</span><span class="ico">${ic(BK.JENIS[j].ic, 22)}</span><b>${BK.JENIS[j].l}</b><p>${{ siswa: 'Peserta didik SMA Negeri 6 Palangkaraya untuk layanan Bimbingan Pribadi, Sosial, Belajar, & Karir.', umum: 'Orang tua, wali murid, guru wali kelas, atau tamu personal yang berkepentingan dengan tim BK.', khusus: 'Tamu kedinasan, pengawas sekolah, instansi pemerintah, atau lembaga mitra kerja sama.' }[j]}</p></button>`).join('')}</div>
+    <div class="cats" id="cats">${Object.keys(BK.JENIS).map(j => `<button type="button" class="cat ${F.jenis === j ? 'on' : ''}" data-cat="${j}"><span class="tick">${ic('check', 14)}</span><span class="ico">${ic(BK.JENIS[j].ic, 22)}</span><b>${BK.JENIS[j].l}</b><p>${{ siswa: 'Peserta didik SMA Negeri 6 Palangka Raya untuk layanan Bimbingan Pribadi, Sosial, Belajar, & Karir.', umum: 'Orang tua, wali murid, guru wali kelas, atau tamu personal yang berkepentingan dengan tim BK.', khusus: 'Tamu kedinasan, pengawas sekolah, instansi pemerintah, atau lembaga mitra kerja sama.' }[j]}</p></button>`).join('')}</div>
     <form id="form" class="card form-card" style="margin-top:22px" novalidate autocomplete="off">
       <span class="eyebrow" style="color:var(--mint)">● Formulir Pendaftaran Tamu</span>
       <h2 class="h-md" id="formTitle" style="margin:4px 0 18px"></h2>
@@ -330,7 +334,7 @@
     if (!tick) { BK.state.left = BK.cfg.RESET_DETIK; tick = setInterval(() => { if (BK.state.hold) return; BK.state.left--; const c = $('#cd'); if (c) c.textContent = BK.state.left; if (BK.state.left <= 0) resetKiosk(); }, 1000); }
   }
   function formFromPayload(s) { const p = s.snap.p, f = newForm(s.snap.jenis); Object.assign(f, { nama: p.nama, email: p.email, hp: p.hp, bidang: p.bidang, ket: p.ket, kelas: p.kelas || '', tujuan: p.tujuan || '', alamat: p.alamat || '', namaMurid: p.namaMurid || '', instansi: p.instansi || '', jabatan: p.jabatan || '', setuju: true, foto: s.snap.foto, thumb: s.pl.thumb, reqId: s.pl.reqId });
-    if (f.jenis === 'umum') { const st = BK.pub.ref.status_tamu; f.alamatPilih = p.alamat === 'SMA Negeri 6 Palangkaraya' ? p.alamat : 'Lainnya'; f.statusPilih = st.indexOf(p.statusTamu) > -1 ? p.statusTamu : 'Lainnya'; f.statusManual = f.statusPilih === 'Lainnya' ? p.statusTamu : ''; }
+    if (f.jenis === 'umum') { const st = BK.pub.ref.status_tamu; f.alamatPilih = p.alamat === 'SMA Negeri 6 Palangka Raya' ? p.alamat : 'Lainnya'; f.statusPilih = st.indexOf(p.statusTamu) > -1 ? p.statusTamu : 'Lainnya'; f.statusManual = f.statusPilih === 'Lainnya' ? p.statusTamu : ''; }
     return f; }
   function resetKiosk() { clearInterval(tick); tick = null; BK.state.left = null; BK.state.hold = false; BK.state.sending = null; F = null; BK.LS.del('draft'); BK.go('#/'); if (location.hash === '#/' || !location.hash) BK.resolve(); }
   function printTicket(r, p, s) {
