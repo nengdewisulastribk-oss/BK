@@ -98,7 +98,7 @@
       ${sel('kelas', 'Kelas', ref.kelas, 'Pilih kelas')}
       ${inp('hp', 'No. WhatsApp / HP', { icon: 'phone', type: 'tel', mode: 'tel', ph: '08xxxxxxxxxx', ac: 'tel', max: 18 })}
       ${inp('email', 'Email Aktif Siswa / Sekolah', { icon: 'mail', type: 'email', mode: 'email', ph: 'nama@email.com', ac: 'email' })}
-      ${radios('tujuan', 'Tujuan Layanan Konseling', ref.tujuan_siswa, true)}
+      ${radios('tujuan', 'Jenis Layanan BK', ref.tujuan_siswa, true)}
       ${chips(ref)}
       ${inp('alamat', 'Alamat / Tempat Tinggal', { icon: 'pin', ph: 'Jl. ..., Palangka Raya', span: true, max: 200 })}
       ${area('ket', 'Keterangan Tambahan / Topik Konseling', { opt: true, ph: 'Ceritakan singkat keperluan Anda...' })}`;
